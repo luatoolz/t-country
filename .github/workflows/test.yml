@@ -20,6 +20,7 @@ jobs:
       DEV: --dev
       SYSDEPS:
       ROCKSPEC: ${{ github.event.repository.name }}-scm-0.rockspec
+      LIBMAXMINDDB_INCDIR: /usr/include/x86_64-linux-gnu
     steps:
     - uses: actions/checkout@master
     - name: system dependencies
