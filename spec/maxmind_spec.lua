@@ -1,0 +1,30 @@
+describe("maxmind", function()
+  local t, is, maxmind
+  setup(function()
+    t = require "t"
+    is = t.is
+    maxmind = assert(require "t.maxmind")
+  end)
+  it("negative", function()
+    assert.is_function(maxmind)
+  end)
+  it("positive", function()
+    assert.is_true(is.ip('8.8.8.8'))
+
+    assert.equal('au', maxmind('1.2.3.4'))
+    assert.equal('us', maxmind('8.8.8.8'))
+    assert.equal('us', maxmind('8.8.8.8'))
+    assert.equal('ru', maxmind('91.232.134.83'))
+  end)
+  it("negative", function()
+    assert.is_nil(maxmind('1.1.1.1'))
+
+    assert.is_nil(maxmind('255.255.255.255'))
+    assert.is_nil(maxmind('777.888.999.666'))
+  end)
+  it("nil", function()
+    assert.is_nil(maxmind())
+    assert.is_nil(maxmind(nil))
+    assert.is_nil(maxmind(''))
+  end)
+end)

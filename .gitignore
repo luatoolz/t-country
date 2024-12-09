@@ -1,0 +1,5 @@
+makefile
+.env
+Dockerfile*
+maxmind.lua
+*.gz
