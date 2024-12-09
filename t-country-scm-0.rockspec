@@ -19,8 +19,8 @@ t.country: country object for `t` lib
 
 dependencies = {
   "lua >= 5.1",
-  "t",
   "lua-maxminddb",
+  "t",
 }
 
 test_dependencies = {
