@@ -30,7 +30,8 @@ jobs:
         luaVersion: ${{ matrix.luaVersion }}
     - uses: jkl1337/gh-actions-luarocks@v5
     - name: test deps
-
+      run: luarocks install lua-maxminddb LIBMAXMINDDB_DIR=/usr/include/x86_64-linux-gnu
+    - name: test deps
       run: luarocks test --prepare ${{ env.DEV }}
     - name: dependencies
       run: luarocks install --deps-mode all --only-deps ${{ env.DEV }} ${{ env.ROCKSPEC }}
