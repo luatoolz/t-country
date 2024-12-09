@@ -3,3 +3,4 @@ makefile
 Dockerfile*
 maxmind.lua
 *.gz
+mc.ini
