@@ -1,6 +1,6 @@
 makefile
 .env
 Dockerfile*
-maxmind.lua
+test.lua
 *.gz
 mc.ini
