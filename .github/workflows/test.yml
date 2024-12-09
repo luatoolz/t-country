@@ -18,7 +18,7 @@ jobs:
         luaVersion: ["5.1", "5.2", "5.3", "luajit", "luajit-openresty"]
     env:
       DEV: --dev
-      SYSDEPS: luajit2 libmaxminddb-dev libmaxminddb0
+      SYSDEPS: libmaxminddb-dev libmaxminddb0
       ROCKSPEC: ${{ github.event.repository.name }}-scm-0.rockspec
       LIBMAXMINDDB_INCDIR: /usr/include/x86_64-linux-gnu
     steps:
