@@ -20,6 +20,7 @@ t.country: country object for `t` lib
 dependencies = {
   "lua >= 5.1",
   "t",
+  "t-net",
   "lua-maxminddb",
 }
 

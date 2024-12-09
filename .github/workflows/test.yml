@@ -21,6 +21,7 @@ jobs:
       SYSDEPS: libmaxminddb-dev libmaxminddb0 build-essential make cmake git curl libssl-dev ssl-cert
       ROCKSPEC: ${{ github.event.repository.name }}-scm-0.rockspec
       LIBMAXMINDDB_INCDIR: /usr/include/x86_64-linux-gnu
+      GEODIR: /usr/share/GeoIP
     steps:
     - uses: actions/checkout@master
     - name: system dependencies
@@ -37,5 +38,7 @@ jobs:
       run: luarocks install --deps-mode all --only-deps ${{ env.DEV }} ${{ env.ROCKSPEC }}
     - name: build
       run: luarocks build --deps-mode all ${{ env.DEV }} ${{ env.ROCKSPEC }}
+    - name: testdata
+      run: mkdir -p ${{ env.GEODIR }} && cp testdata/GeoLite2-City-Test.mmdb ${{ env.GEODIR }}/GeoLite2-City.mmdb
     - name: test
       run: luarocks test -- -o TAP
