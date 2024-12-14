@@ -1,6 +1,15 @@
 name: test
 on:
   push:
+    branches:
+      - main
+    paths:
+      - '**.lua'
+      - '**.t'
+      - '**.yml'
+      - '**.rockspec'
+      - 'Dockerfile'
+      - 'Dockerfile.**'
   workflow_dispatch:
 env:
   repo: ${{ github.repository }}
