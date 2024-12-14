@@ -18,7 +18,7 @@ jobs:
         luaVersion: ["5.1", "5.2", "5.3", "luajit", "luajit-openresty"]
     env:
       DEV: --dev
-      SYSDEPS: libmaxminddb-dev libmaxminddb0 build-essential make cmake git curl libssl-dev ssl-cert pkgconf
+      SYSDEPS: libmaxminddb-dev libmaxminddb0 build-essential make cmake git curl libssl-dev ssl-cert pkg-config
       ROCKDEPS: https://raw.githubusercontent.com/luatoolz/lua-maxminddb/master/lua-maxminddb-scm-0.rockspec
       ROCKSPEC: ${{ github.event.repository.name }}-scm-0.rockspec
       LIBMAXMINDDB_INCDIR: /usr/include/x86_64-linux-gnu
