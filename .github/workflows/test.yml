@@ -27,6 +27,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          build-args:
+            LUA_VERSION: ${{ matrix.luaVersion }}
           load: true
           tags: ${{ github.repository }}:${{ matrix.luaVersion }}
       - name: test
