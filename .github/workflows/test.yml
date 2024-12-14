@@ -1,14 +1,6 @@
 name: test
 on:
   push:
-    branches:
-      - main
-    paths:
-      - '**.lua'
-      - '**.mmdb'
-      - '**.mk'
-      - '**.yml'
-      - '**.rockspec'
   workflow_dispatch:
 env:
   repo: ${{ github.repository }}
@@ -19,11 +11,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ["5.1", "5.2", "5.3", "jit"]
-    env:
-      version: ${{ matrix.version }}
-      tag: ${{ github.repository }}:${{ env.version }}
-      busted: busted-${{ matrix.version }}
+        luaVersion:
+          - 5.1
+          - 5.2
+          - 5.3
+          - jit
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,7 +26,8 @@ jobs:
       - name: Build and export to Docker
         uses: docker/build-push-action@v6
         with:
+          context: .
           load: true
-          tags: ${{ env.repo }}:${{ matrix.version }}
+          tags: ${{ github.repository }}:${{ matrix.luaVersion }}
       - name: test
-        run:  docker run --rm ${{ env.repo }}:${{ matrix.version }} busted-${{ matrix.version }}
+        run: docker run --rm ${{ github.repository }}:${{ matrix.luaVersion }} busted-${{ matrix.luaVersion }}
