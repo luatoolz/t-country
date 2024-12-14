@@ -3,14 +3,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '**.lua'
-      - '**.t'
-      - '**.yml'
-      - '**.rockspec'
-      - 'Dockerfile'
-      - 'Dockerfile.**'
   workflow_dispatch:
+
 env:
   repo: ${{ github.repository }}
   ROCKSPEC: ${{ github.event.repository.name }}-scm-0.rockspec
@@ -36,8 +30,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          build-args:
-            LUA_VERSION: ${{ matrix.luaVersion }}
+          build-args: |
+            LUA_VERSION=${{ matrix.luaVersion }}
           load: true
           tags: ${{ github.repository }}:${{ matrix.luaVersion }}
       - name: test
