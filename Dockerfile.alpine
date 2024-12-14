@@ -1,0 +1,71 @@
+# syntax=docker/dockerfile:1
+# check=skip=JSONArgsRecommended,StageNameCasing
+ARG SOURCE_DATE_EPOCH=0
+ARG LUA_VERSION=${LUA_VERSION:-jit}
+ARG GEODIR=/usr/share/GeoIP/
+ARG MMDB=GeoLite2-City.mmdb
+ARG MMTESTDB=testdata/GeoLite2-City-Test.mmdb
+
+FROM alpine AS build
+ARG SOURCE_DATE_EPOCH
+ARG LUA_VERSION
+ARG GEODIR
+ARG MMDB
+
+RUN apk update && apk add \
+  ca-certificates curl \
+  build-base gcc git make cmake \
+  lua${LUA_VERSION}-dev lua${LUA_VERSION} \
+	pkgconf
+
+FROM build AS base
+ARG SOURCE_DATE_EPOCH
+ARG LUA_VERSION
+ARG GEODIR
+ARG MMDB
+COPY --from=build / /
+
+RUN test "$LUA_VERSION" = "jit" && apk add lua5.1 lua5.1-dev luarocks5.1 || apk add luarocks${LUA_VERSION}
+RUN ln -s /usr/bin/luarocks-5.1 /usr/bin/luarocks-jit
+RUN test -f /usr/bin/luarocks || ln -s /usr/bin/luarocks-${LUA_VERSION} /usr/bin/luarocks
+RUN luarocks config --scope system lua_dir /usr
+
+FROM alpine AS maxmind
+ARG SOURCE_DATE_EPOCH
+ARG GEODIR
+ARG MMDB
+ARG MMTESTDB
+
+RUN mkdir -p $GEODIR
+WORKDIR $GEODIR
+COPY $MMTESTDB $GEODIR$MMDB
+
+FROM base AS libs
+ARG SOURCE_DATE_EPOCH
+COPY --from=base / /
+
+RUN apk add libmaxminddb libmaxminddb-dev libmaxminddb-libs
+
+FROM libs AS soft
+ARG SOURCE_DATE_EPOCH
+ARG LUA_VERSION
+WORKDIR /src
+COPY --from=libs / /
+COPY . /src
+RUN luarocks install https://raw.githubusercontent.com/luatoolz/lua-maxminddb/master/lua-maxminddb-scm-0.rockspec
+RUN luarocks make --dev t-country-scm-0.rockspec
+RUN luarocks test --prepare --dev
+RUN apk del build-base gcc git make cmake libmaxminddb-dev lua-dev && rm -rf /var/cache
+
+FROM scratch
+ARG SOURCE_DATE_EPOCH
+ARG GEODIR
+ARG LUA_VERSION
+ENV LUA_VERSION=$LUA_VERSION
+COPY --from=soft / /
+COPY --from=maxmind $GEODIR $GEODIR
+WORKDIR /src
+
+RUN test ! -f "`which busted`" || test -f "`which busted-$LUA_VERSION`" \
+  || ( cp "`which busted`" "`which busted`"-$LUA_VERSION && sed -i "s/5.1/$LUA_VERSION/" "`which busted-$LUA_VERSION`" )
+CMD busted-$LUA_VERSION -o TAP

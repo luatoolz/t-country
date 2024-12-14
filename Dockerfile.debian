@@ -1,0 +1,62 @@
+# syntax=docker/dockerfile:1
+ARG DEBIAN_FRONTEND=noninteractive
+ARG LANG=en_US.UTF-8
+ARG SOURCE_DATE_EPOCH=0
+ARG LUA_VERSION=5.1
+ARG GEODIR=/usr/share/GeoIP/
+ARG MMDB=GeoLite2-City.mmdb
+ARG MMTESTDB=testdata/GeoLite2-City-Test.mmdb
+
+FROM debian:bookworm-slim AS build
+ARG DEBIAN_FRONTEND
+ARG SOURCE_DATE_EPOCH
+ARG LUA_VERSION
+ARG GEODIR
+ARG MMDB
+
+RUN apt update -y && apt install --no-install-recommends -y \
+	ca-certificates locales \
+	sudo mc net-tools curl procps iputils-ping \
+	build-essential git \
+  libluajit2-5.1-dev liblua5.1-0-dev liblua5.3-dev \
+  luajit2 lua$LUA_VERSION luarocks
+
+RUN echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen && locale-gen && \
+	localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+
+RUN test -f /usr/bin/luarocks || ln -s /usr/bin/luarocks-$LUA_VERSION /usr/bin/luarocks
+RUN luarocks config --scope system lua_dir /usr
+
+COPY mc.ini /root/.config/mc/mc.ini
+
+FROM debian:bookworm-slim AS maxmind
+ARG GEODIR
+ARG MMDB
+ARG MMTESTDB
+
+RUN mkdir -p $GEODIR
+WORKDIR $GEODIR
+COPY $MMTESTDB $GEODIR$MMDB
+
+FROM build AS libs
+COPY --from=build / /
+ARG DEBIAN_FRONTEND
+ARG SOURCE_DATE_EPOCH
+
+RUN apt install --no-install-recommends -y libmaxminddb-dev libmaxminddb0 cmake
+
+RUN luarocks install lua-maxminddb LIBMAXMINDDB_INCDIR=/usr/include/x86_64-linux-gnu
+RUN luarocks install --dev t-country
+
+RUN apt autoremove -y && apt-get clean -y
+RUN rm -rf /var/lib/apt/* /var/lib/dpkg/*
+
+FROM scratch
+ARG LANG
+ARG GEODIR
+ENV LANG=$LANG
+COPY --from=libs / /
+COPY --from=maxmind $GEODIR $GEODIR
+
+WORKDIR /root
+COPY test.lua ./

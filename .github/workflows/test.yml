@@ -5,42 +5,36 @@ on:
       - main
     paths:
       - '**.lua'
-      - '**.t'
+      - '**.mmdb'
+      - '**.mk'
       - '**.yml'
       - '**.rockspec'
   workflow_dispatch:
+env:
+  IMAGE: ${{ github.repository }}
+  ROCKSPEC: ${{ github.event.repository.name }}-scm-0.rockspec
 jobs:
-  test:
+  docker:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        luaVersion: ["5.1", "5.2", "5.3", "luajit", "luajit-openresty"]
+        version: ["5.1", "5.2", "5.3", "jit"]
     env:
-      DEV: --dev
-      SYSDEPS: libmaxminddb-dev libmaxminddb0 build-essential make cmake git curl libssl-dev ssl-cert pkgconf
-      ROCKDEPS: https://raw.githubusercontent.com/luatoolz/lua-maxminddb/master/lua-maxminddb-scm-0.rockspec
-      ROCKSPEC: ${{ github.event.repository.name }}-scm-0.rockspec
-      LIBMAXMINDDB_INCDIR: /usr/include/x86_64-linux-gnu
-      GEODIR: /usr/share/GeoIP
-      LUA_VERSION: ${{ matrix.luaVersion }}
+      version: ${{ matrix.version }}
+      tag: ${{ github.repository }}:${{ env.version }}
+      busted: busted-${{ env.version }}
     steps:
-    - uses: actions/checkout@master
-    - name: system dependencies
-      run: sudo apt-get update -y && sudo apt-get install -y ${{ env.SYSDEPS }}
-    - uses: jkl1337/gh-actions-lua@v11
-      with:
-        luaVersion: ${{ matrix.luaVersion }}
-    - uses: jkl1337/gh-actions-luarocks@v5
-    - name: test deps
-      run: luarocks install ${{ env.ROCKDEPS }} LUA_VERSION=${{ env.LUA_VERSION }} LIBMAXMINDDB_INCDIR=${{ env.LIBMAXMINDDB_INCDIR }}
-    - name: test deps
-      run: luarocks test --prepare ${{ env.DEV }}
-    - name: dependencies
-      run: luarocks install --deps-mode all --only-deps ${{ env.DEV }} ${{ env.ROCKSPEC }}
-    - name: build
-      run: luarocks build --deps-mode all ${{ env.DEV }} ${{ env.ROCKSPEC }}
-    - name: testdata
-      run: mkdir -p ${{ env.GEODIR }} && cp testdata/GeoLite2-City-Test.mmdb ${{ env.GEODIR }}/GeoLite2-City.mmdb
-    - name: test
-      run: luarocks test -- -o TAP
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and export to Docker
+        uses: docker/build-push-action@v6
+        with:
+          load: true
+          tags: ${{ env.tag }}
+      - name: test
+        run:  docker run --rm ${{ env.tag }} ${{ env.busted }}

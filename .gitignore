@@ -1,6 +1,8 @@
 makefile
+*.mk
 .env
-Dockerfile*
 test.lua
 *.gz
 mc.ini
+Dockerfile.busted
+busted
