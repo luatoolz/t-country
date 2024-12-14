@@ -68,4 +68,5 @@ WORKDIR /src
 
 RUN test ! -f "`which busted`" || test -f "`which busted-$LUA_VERSION`" \
   || ( cp "`which busted`" "`which busted`"-$LUA_VERSION && sed -i "s/5.1/$LUA_VERSION/" "`which busted-$LUA_VERSION`" )
+
 CMD busted-$LUA_VERSION -o TAP
