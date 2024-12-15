@@ -3,7 +3,7 @@ describe("maxmind", function()
   setup(function()
     t = require "t"
     is = t.is
-    maxmind = assert(require "t.maxmind")
+    maxmind = assert(t.maxmind)
   end)
   it("negative", function()
     assert.is_function(maxmind)
@@ -16,6 +16,9 @@ describe("maxmind", function()
     assert.equal('gb', maxmind('81.2.69.143'))
     assert.equal('gb', maxmind('81.2.69.160'))
     assert.equal('se', maxmind('89.160.20.112'))
+
+    assert.equal('se', maxmind('89.160.20.128'))
+    assert.equal('se', maxmind('89-160-20-128.cust.bredband2.com'))
   end)
   it("negative", function()
     assert.is_nil(maxmind('1.1.1.1'))

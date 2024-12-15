@@ -5,8 +5,7 @@ local normalize = function(x) return (type(x)=='string' and x~='') and string.lo
 local key = checker({id=true, code=true, name=true, alias=true}, normalize)
 local values
 local is = t.is
---local ip = t.net.ip
-local geoip = assert(require "t.maxmind")
+local geoip = assert(t.maxmind)
 
 return setmetatable(country, {
 __call=function(self, k) if self==country and k then
