@@ -18,7 +18,10 @@ __concat=function(self, ct)
   return self
 end,
 __export=function(self) if self~=country then return tostring(self) end end,
-__index=function(self, k) return k and rawget((key[k] or type(k)=='number') and self or country, type(k)=='string' and normalize(k) or k) or nil end,
+__index=function(self, k)
+  if type(k)=='number' then return rawget(country, k) end
+  return k and rawget(key[k] and self or country, normalize(k))
+end,
 __iter=function(self) return table.iter(values) end,
 __newindex=function(self, k, v)
   if self==country then
@@ -30,18 +33,20 @@ __newindex=function(self, k, v)
         rawset(self, normalize(k.id), k)
         rawset(self, normalize(k.code), k)
         rawset(self, normalize(k.name), k)
+        local i=#country+1
+        rawset(k, 'i', i)
+        rawset(country, i, k)
         if type(k.alias)=='table' then
           for _,id in ipairs(k.alias) do
             id=normalize(id)
             if not rawget(self, id) then rawset(self, id, k)
               end end end end end end end,
 __pairs=function(self)
-  local inext, _, i, v = ipairs(values)
-  return function(_, cur)
-    repeat i,v = inext(values, i or 0)
-    until type(i)=='number' or type(i)=='nil'
+  return function(arr, cur)
+    local i=((arr[cur] or {}).i or 0)+1
+    local v=country[i]
     if v then return v.id, v end
-      end, self
+  end, self
 end,
 __tostring = function(self) return self==country and 'country' or self.id end,
 }) .. values

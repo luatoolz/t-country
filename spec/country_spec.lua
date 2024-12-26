@@ -71,21 +71,22 @@ describe("country", function()
     assert.equal('us', tostring(country('US')))
   end)
   it("__iter", function()
-    local count = 0
-    for c in table.iter(country) do
-      assert.equal(c.id, tostring(c))
-      count = count+1
+    local i = 0
+    for v in table.iter(country) do
+      i=i+1
+      assert.equal(v.id, tostring(v))
+      assert.equal(i, v.i)
     end
-    assert.equal(249, count)
+    assert.equal(249, i)
   end)
   it("__pairs", function()
-    local count = 0
+    local i = 0
     for k,v in pairs(country) do
-      print('#', count, k)
+      i=i+1
       assert.equal(k, tostring(v))
-      count=count+1
+      assert.equal(i, v.i)
     end
-    assert.equal(249, count)
+    assert.equal(249, i)
   end)
   it("ip lookup country", function()
     assert.equal('us', country('214.78.0.0'))
