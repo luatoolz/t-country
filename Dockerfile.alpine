@@ -44,7 +44,7 @@ FROM base AS libs
 ARG SOURCE_DATE_EPOCH
 COPY --from=base / /
 
-RUN apk add libmaxminddb libmaxminddb-dev libmaxminddb-libs
+RUN apk add libmaxminddb libmaxminddb-dev libmaxminddb-libs libidn2-dev
 
 FROM libs AS soft
 ARG SOURCE_DATE_EPOCH
