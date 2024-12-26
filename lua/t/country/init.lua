@@ -3,12 +3,14 @@ local checker = t.checker
 local country = {}
 local normalize = function(x) return (type(x)=='string' and x~='') and string.lower(x) or nil end
 local key = checker({id=true, code=true, name=true, alias=true}, normalize)
-local values = t['country/data']
+local values = require 't.country.data'
 local is = t.is
+local mt = t.mt
 local geoip = assert(t.maxmind)
 
 return setmetatable(country, {
 __call=function(self, k) if self==country and k then
+  if type(k)=='table' and mt(self)==mt(k) then return k end
   if is.ip(k) then return geoip and geoip(k) else return self[k] end
 end end,
 __concat=function(self, ct)
@@ -19,6 +21,7 @@ __concat=function(self, ct)
 end,
 __export=function(self) if self~=country then return tostring(self) end end,
 __index=function(self, k)
+  if type(k)=='nil' then return nil end
   if type(k)=='number' then return rawget(self, k) end
   return k and rawget(key[k] and self or country, normalize(k))
 end,
