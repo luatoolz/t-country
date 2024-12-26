@@ -1,4 +1,4 @@
-local t=t or require "t"
+local t=require "t"
 local checker = t.checker
 local country = {}
 local normalize = function(x) return (type(x)=='string' and x~='') and string.lower(x) or nil end
@@ -19,7 +19,7 @@ __concat=function(self, ct)
 end,
 __export=function(self) if self~=country then return tostring(self) end end,
 __index=function(self, k)
-  if type(k)=='number' then return rawget(country, k) end
+  if type(k)=='number' then return rawget(self, k) end
   return k and rawget(key[k] and self or country, normalize(k))
 end,
 __iter=function(self) return table.iter(values) end,
@@ -27,14 +27,14 @@ __newindex=function(self, k, v)
   if self==country then
     if type(k)=='table' and type(getmetatable(k))=='nil' and v then
       if k.id and k.code and k.name then
+        local i=#country+1
         k.id=normalize(k.id)
         k.code=normalize(k.code)
+        rawset(k, 'i', i)
         setmetatable(k, getmetatable(country))
         rawset(self, normalize(k.id), k)
         rawset(self, normalize(k.code), k)
         rawset(self, normalize(k.name), k)
-        local i=#country+1
-        rawset(k, 'i', i)
         rawset(country, i, k)
         if type(k.alias)=='table' then
           for _,id in ipairs(k.alias) do
@@ -43,10 +43,10 @@ __newindex=function(self, k, v)
               end end end end end end end,
 __pairs=function(self)
   return function(arr, cur)
-    local i=((arr[cur] or {}).i or 0)+1
+    local i=(((arr or {})[cur] or {}).i or 0)+1
     local v=country[i]
     if v then return v.id, v end
-  end, self
+  end, self or {}
 end,
 __tostring = function(self) return self==country and 'country' or self.id end,
 }) .. values

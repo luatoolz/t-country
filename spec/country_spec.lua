@@ -88,6 +88,14 @@ describe("country", function()
     end
     assert.equal(249, i)
   end)
+  it("__ipairs", function()
+    local i=0
+    for ii=1,#country do
+      i=i+1
+      assert.equal(i, country[i].i)
+    end
+    assert.equal(249, i)
+  end)
   it("ip lookup country", function()
     assert.equal('us', country('214.78.0.0'))
     assert.equal('us', country('216.160.83.56'))
