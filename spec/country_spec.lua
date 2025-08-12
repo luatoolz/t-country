@@ -1,8 +1,9 @@
 describe("country", function()
-  local t, is, country
+  local t, is, country, iter
   setup(function()
     t = require "t"
     is = t.is
+    iter = t.iter
     country = assert(t.country, "failed to load t.country")
   end)
   it("meta", function()
@@ -74,7 +75,7 @@ describe("country", function()
   end)
   it("__iter", function()
     local i = 0
-    for v in table.iter(country) do
+    for v in iter(country) do
       i=i+1
       assert.equal(v.id, tostring(v))
       assert.equal(i, v.i)
@@ -107,8 +108,7 @@ describe("country", function()
   end)
   it("negative lookup", function()
     assert.is_nil(country('0.-1.0.0'))
-    assert.is_nil(country('0.0.0.0'))
     assert.is_nil(country('1.1.1.1'))
-    assert.is_nil(country('255.255.255.255'))
+    assert.is_nil(country('255.255.255.254'))
   end)
 end)

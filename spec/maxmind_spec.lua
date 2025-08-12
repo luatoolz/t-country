@@ -9,7 +9,7 @@ describe("maxmind", function()
     assert.is_function(maxmind)
   end)
   it("positive", function()
-    assert.is_true(is.ip('2.125.160.216'))
+    assert.is_true(is.net.ip('2.125.160.216'))
 
     assert.equal('bt', maxmind('67.43.156.1'))
     assert.equal('gb', maxmind('81.2.69.142'))
